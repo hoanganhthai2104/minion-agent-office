@@ -102,52 +102,212 @@ export class Worker {
     name: string,
     private color: string,
   ) {
-    const skin = (this.skin = toonUnique(color));
+    // Generate deterministic seed from minion name for varied styles
+    let seed = 0;
+    for (let i = 0; i < name.length; i++) {
+      seed = ((seed << 5) - seed + name.charCodeAt(i)) | 0;
+    }
+    seed = Math.abs(seed);
+
+    // Ultra cute warm Minion yellow skin & cartoon palette
+    const minionYellow = '#ffd534';
+    const skin = (this.skin = toonUnique(minionYellow));
     const white = toon('#ffffff');
     const ink = toon('#1d1d1d');
+    const goggleMetal = toon('#9aa3ad');
+    const strapBlack = toon('#222222');
+    const denimBlue = toon('#2b65a4');
+    const darkPocket = toon('#1e4d82');
+    const gloveBlack = toon('#1c1c1c');
+    const bootBlack = toon('#151515');
+    const blushPink = toon('#ff9eb5');
+    const tonguePink = toon('#ff6b8b');
 
     this.root.add(this.body);
-    // Bean-shaped body
-    const bean = mesh(new THREE.CapsuleGeometry(0.28, 0.3, 8, 16), skin, 0, 0.55, 0);
+
+    // Chubby Chibi Minion proportions: extra round & cute
+    const bodyVariant = seed % 3;
+    let bodyRadius = 0.30;
+    let bodyHeight = 0.26;
+    if (bodyVariant === 0) {
+      bodyRadius = 0.28;
+      bodyHeight = 0.34; // Tall minion (Kevin)
+    } else if (bodyVariant === 1) {
+      bodyRadius = 0.32;
+      bodyHeight = 0.20; // Extra chubby round minion (Bob)
+    }
+
+    // Bean/Capsule body
+    const bean = mesh(new THREE.CapsuleGeometry(bodyRadius, bodyHeight, 10, 18), skin, 0, 0.54, 0);
     this.body.add(bean);
-    // Big cartoon eyes
-    for (const sx of [-1, 1]) {
-      const eye = mesh(new THREE.SphereGeometry(0.09, 12, 10), white, sx * 0.11, 0.7, 0.23, false);
-      eye.scale.z = 0.6;
+
+    // Denim overalls
+    const overallsCyl = mesh(new THREE.CylinderGeometry(bodyRadius + 0.006, bodyRadius - 0.008, 0.23, 18), denimBlue, 0, 0.39, 0, false);
+    this.body.add(overallsCyl);
+
+    // Bibs
+    const bibFront = mesh(new THREE.BoxGeometry(bodyRadius * 0.96, 0.13, 0.04), denimBlue, 0, 0.50, bodyRadius * 0.88, false);
+    const bibBack = mesh(new THREE.BoxGeometry(bodyRadius * 0.96, 0.13, 0.04), denimBlue, 0, 0.50, -bodyRadius * 0.88, false);
+    this.body.add(bibFront, bibBack);
+
+    // Chest pocket
+    const pocket = mesh(new THREE.BoxGeometry(0.12, 0.075, 0.02), darkPocket, 0, 0.47, bodyRadius * 0.95, false);
+    this.body.add(pocket);
+
+    // Overalls straps
+    const strapL = mesh(new THREE.BoxGeometry(0.045, 0.02, bodyRadius * 1.8), denimBlue, -bodyRadius * 0.48, 0.57, 0, false);
+    const strapR = mesh(new THREE.BoxGeometry(0.045, 0.02, bodyRadius * 1.8), denimBlue, bodyRadius * 0.48, 0.57, 0, false);
+    this.body.add(strapL, strapR);
+
+    // Yellow or black buttons on straps
+    const btnL = mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.018, 8), ink, -bodyRadius * 0.48, 0.54, bodyRadius * 0.91, false);
+    btnL.rotation.x = Math.PI / 2;
+    const btnR = mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.018, 8), ink, bodyRadius * 0.48, 0.54, bodyRadius * 0.91, false);
+    btnR.rotation.x = Math.PI / 2;
+    this.body.add(btnL, btnR);
+
+    // Eyes and Goggles
+    const isOneEyed = seed % 3 === 0;
+    const eyeY = 0.54 + bodyHeight * 0.5;
+
+    // Head strap
+    const goggleStrap = mesh(new THREE.TorusGeometry(bodyRadius + 0.007, 0.035, 6, 24), strapBlack, 0, eyeY, 0, false);
+    goggleStrap.rotation.x = Math.PI / 2;
+    this.body.add(goggleStrap);
+    this.headset.push(goggleStrap);
+
+    if (isOneEyed) {
+      // Big one-eyed goggle
+      const goggleRim = mesh(new THREE.TorusGeometry(0.13, 0.028, 8, 24), goggleMetal, 0, eyeY, bodyRadius * 0.88, false);
+      const eye = mesh(new THREE.SphereGeometry(0.115, 14, 12), white, 0, eyeY, bodyRadius * 0.84, false);
+      eye.scale.z = 0.55;
       this.body.add(eye);
-      const pupil = mesh(new THREE.SphereGeometry(0.045, 10, 8), ink, sx * 0.11, 0.7, 0.29, false);
+      this.body.add(goggleRim);
+      this.headset.push(goggleRim);
+
+      const pupil = mesh(new THREE.SphereGeometry(0.055, 12, 10), toon('#5d3416'), 0, eyeY, bodyRadius * 0.92, false);
+      const pupilCenter = mesh(new THREE.SphereGeometry(0.028, 8, 8), ink, 0, eyeY, bodyRadius * 0.94, false);
+      pupil.add(pupilCenter);
+      // Cute sparkling catchlight in pupil
+      const sparkle = mesh(new THREE.SphereGeometry(0.014, 6, 6), white, 0.016, eyeY + 0.018, bodyRadius * 0.95, false);
       this.body.add(pupil);
-      this.eyes.push(eye, pupil);
+      this.body.add(sparkle);
+      this.eyes.push(eye, pupil, sparkle);
       this.pupils.push(pupil);
+
+      const fL = mesh(new THREE.BoxGeometry(0.045, 0.038, 0.045), goggleMetal, -0.15, eyeY, bodyRadius * 0.82, false);
+      const fR = mesh(new THREE.BoxGeometry(0.045, 0.038, 0.045), goggleMetal, 0.15, eyeY, bodyRadius * 0.82, false);
+      this.body.add(fL, fR);
+      this.headset.push(fL, fR);
+    } else {
+      // Two-eyed goggles
+      for (const sx of [-1, 1]) {
+        const eyeX = sx * 0.098;
+        const goggleRim = mesh(new THREE.TorusGeometry(0.09, 0.023, 8, 20), goggleMetal, eyeX, eyeY, bodyRadius * 0.88, false);
+        const eye = mesh(new THREE.SphereGeometry(0.085, 12, 10), white, eyeX, eyeY, bodyRadius * 0.84, false);
+        eye.scale.z = 0.55;
+        this.body.add(eye);
+        this.body.add(goggleRim);
+        this.headset.push(goggleRim);
+
+        const irisColor = (seed % 5 === 0 && sx === -1) ? '#2e8b57' : '#5d3416';
+        const pupil = mesh(new THREE.SphereGeometry(0.044, 10, 8), toon(irisColor), eyeX, eyeY, bodyRadius * 0.91, false);
+        const pupilCenter = mesh(new THREE.SphereGeometry(0.023, 8, 6), ink, eyeX, eyeY, bodyRadius * 0.93, false);
+        pupil.add(pupilCenter);
+        // Sparkling catchlight
+        const sparkle = mesh(new THREE.SphereGeometry(0.012, 6, 6), white, eyeX + 0.012, eyeY + 0.014, bodyRadius * 0.94, false);
+        this.body.add(pupil);
+        this.body.add(sparkle);
+        this.eyes.push(eye, pupil, sparkle);
+        this.pupils.push(pupil);
+
+        const f = mesh(new THREE.BoxGeometry(0.038, 0.032, 0.038), goggleMetal, sx * 0.18, eyeY, bodyRadius * 0.80, false);
+        this.body.add(f);
+        this.headset.push(f);
+      }
+      const bridge = mesh(new THREE.BoxGeometry(0.035, 0.026, 0.026), goggleMetal, 0, eyeY, bodyRadius * 0.90, false);
+      this.body.add(bridge);
+      this.headset.push(bridge);
     }
-    // Headset: band + mic
-    const band = mesh(new THREE.TorusGeometry(0.29, 0.025, 6, 20, Math.PI), toon('#2b2d42'), 0, 0.72, 0, false);
-    band.rotation.y = Math.PI / 2;
-    this.body.add(band);
-    this.headset.push(band);
+
+    // ULTRA CUTE: Big Happy Cartoon Smile!
+    const mouthY = eyeY - 0.16;
+    const smileCurve = new THREE.TorusGeometry(0.065, 0.011, 6, 16, Math.PI);
+    const smileMesh = mesh(smileCurve, ink, 0, mouthY, bodyRadius * 0.95, false);
+    smileMesh.rotation.z = Math.PI; // upward curve
+    this.body.add(smileMesh);
+
+    // Cute pink tongue peeking out
+    const tongue = mesh(new THREE.SphereGeometry(0.025, 8, 8), tonguePink, 0, mouthY - 0.018, bodyRadius * 0.94, false);
+    tongue.scale.set(1.3, 0.6, 0.4);
+    this.body.add(tongue);
+
+    // ULTRA CUTE: Rosy Pink Blush Cheeks
     for (const sx of [-1, 1]) {
-      const cup = mesh(new THREE.SphereGeometry(0.07, 10, 8), toon('#2b2d42'), sx * 0.29, 0.72, 0, false);
-      this.body.add(cup);
-      this.headset.push(cup);
+      const cheekX = sx * (isOneEyed ? 0.15 : 0.17);
+      const cheek = mesh(new THREE.SphereGeometry(0.036, 8, 6), blushPink, cheekX, mouthY + 0.03, bodyRadius * 0.91, false);
+      cheek.scale.set(1.3, 0.8, 0.25);
+      this.body.add(cheek);
     }
-    // Antenna with status bulb
-    this.body.add(mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.22, 6), toon('#2b2d42'), 0, 1.07, 0, false));
+
+    // Minion Hair Styles
+    const hairStyle = seed % 4;
+    const headTopY = 0.54 + bodyHeight * 0.5 + bodyRadius;
+    if (hairStyle === 0) {
+      // Sprout: cute little tuft
+      for (let i = 0; i < 5; i++) {
+        const ang = (i / 5) * Math.PI * 2;
+        const strand = mesh(new THREE.CylinderGeometry(0.005, 0.006, 0.075, 4), ink, Math.cos(ang) * 0.02, headTopY + 0.035, Math.sin(ang) * 0.02, false);
+        strand.rotation.z = Math.cos(ang) * 0.2;
+        strand.rotation.x = Math.sin(ang) * 0.2;
+        this.body.add(strand);
+        this.headset.push(strand);
+      }
+    } else if (hairStyle === 1) {
+      // Parted
+      for (const sx of [-1, 1]) {
+        for (let j = 0; j < 3; j++) {
+          const strand = mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.065, 4), ink, sx * (0.03 + j * 0.03), headTopY + 0.015, (j - 1) * 0.02, false);
+          strand.rotation.z = -sx * 0.6;
+          this.body.add(strand);
+          this.headset.push(strand);
+        }
+      }
+    } else if (hairStyle === 2) {
+      // Buzz tufts
+      for (let k = 0; k < 6; k++) {
+        const kx = ((k % 3) - 1) * 0.04;
+        const kz = (Math.floor(k / 3) - 0.5) * 0.06;
+        const strand = mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.045, 4), ink, kx, headTopY + 0.018, kz, false);
+        strand.rotation.z = (Math.sin(k * 3) * 0.3);
+        this.body.add(strand);
+        this.headset.push(strand);
+      }
+    }
+
+    // Subtle Cute Status Glow (replaces the industrial antenna with a cute glowing star/crown)
+    const bulbY = headTopY + 0.06;
     this.bulb = toonUnique(STATUS_BULB.starting);
-    this.bulb.emissive = new THREE.Color(STATUS_BULB.starting).multiplyScalar(0.6);
-    this.bulbMesh = mesh(new THREE.SphereGeometry(0.075, 12, 10), this.bulb, 0, 1.2, 0, false);
+    this.bulb.emissive = new THREE.Color(STATUS_BULB.starting).multiplyScalar(0.7);
+    this.bulbMesh = mesh(new THREE.SphereGeometry(0.05, 12, 10), this.bulb, 0, bulbY, 0, false);
     this.body.add(this.bulbMesh);
 
+    // Arms with Black Gloves
     const arm = (x: number) => {
       const pivot = new THREE.Group();
-      pivot.position.set(x, 0.55, 0.05);
-      pivot.add(mesh(new THREE.CapsuleGeometry(0.055, 0.16, 4, 8), skin, 0, -0.12, 0));
+      pivot.position.set(x, 0.54, 0.05);
+      const upperArm = mesh(new THREE.CapsuleGeometry(0.052, 0.10, 4, 8), skin, 0, -0.06, 0);
+      const glove = mesh(new THREE.CapsuleGeometry(0.058, 0.07, 4, 8), gloveBlack, 0, -0.13, 0);
+      pivot.add(upperArm, glove);
       this.body.add(pivot);
       return pivot;
     };
-    this.armL = arm(-0.3);
-    this.armR = arm(0.3);
+    this.armL = arm(-bodyRadius - 0.03);
+    this.armR = arm(bodyRadius + 0.03);
+
+    // Feet with Cute Little Boots
     for (const sx of [-1, 1]) {
-      const foot = mesh(new THREE.CapsuleGeometry(0.06, 0.1, 4, 8), skin, sx * 0.12, 0.2, 0.05);
+      const foot = mesh(new THREE.CapsuleGeometry(0.065, 0.09, 4, 8), bootBlack, sx * 0.12, 0.17, 0.05);
       this.body.add(foot);
       this.feet.push(foot);
     }
