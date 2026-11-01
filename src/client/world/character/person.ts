@@ -57,6 +57,7 @@ export class Person {
   private voiceLevel = 0;
   /** 0 = lips together, 1 = wide open. Follows the voice's loudness. */
   private mouthOpen = 0;
+  private humanEyes: THREE.Mesh[] = [];
   /** Keep the talking mouth up through the short gaps between words. */
   private talkUntil = 0;
   private walkPhase = 0;
@@ -142,7 +143,9 @@ export class Person {
     head.add(this.hair);
     this.buildHair();
     for (const sx of [-1, 1]) {
-      head.add(mesh(new THREE.SphereGeometry(0.055, 10, 8), ink, sx * 0.12, 0.02, 0.3, false));
+      const eyeMesh = mesh(new THREE.SphereGeometry(0.055, 10, 8), ink, sx * 0.12, 0.02, 0.3, false);
+      this.humanEyes.push(eyeMesh);
+      head.add(eyeMesh);
       head.add(mesh(new THREE.SphereGeometry(0.05, 10, 8), toon('#ff9f9f'), sx * 0.2, -0.08, 0.27, false));
     }
     const smile = (this.smile = mesh(new THREE.TorusGeometry(0.06, 0.015, 6, 12, Math.PI), ink, 0, -0.08, 0.32, false));
@@ -245,7 +248,9 @@ export class Person {
   private dress() {
     this.skin.color.set(SKIN_TONES[this.look.skin]);
     if (this.costume === 'halloween') this.skin.color.lerp(UNDEAD_SKIN, 0.7);
-    const style = HAIR_STYLES[this.look.style];
+    const style = HAIR_STYLES[this.look.style] ?? '';
+    const isMinion = style.includes('🍌') || style.includes('Minion');
+    for (const e of this.humanEyes) e.visible = !isMinion;
     this.hair.visible = !this.costume || !(style === 'Spiky' || style === 'Bun' || style === 'Curly');
   }
 

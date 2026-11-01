@@ -155,6 +155,23 @@ export function openCharacter(first: boolean, onSave: (p: Profile) => void) {
     input.title = 'Your account name';
   }
 
+    // Quick Minion transformation buttons
+  const minionPresets = [
+    { label: '🍌 Stuart', style: 7, skin: 0, color: '#245892' },
+    { label: '🍌 Bob', style: 8, skin: 0, color: '#245892' },
+    { label: '🍌 Kevin', style: 9, skin: 0, color: '#245892' },
+  ];
+  const minionPresetRow = h('div.seg', { role: 'group', 'aria-label': 'Minion presets', style: 'margin-bottom: 12px; gap: 8px;' });
+  minionPresetRow.replaceChildren(
+    ...minionPresets.map((mp) =>
+      h('button.btn', {
+        type: 'button',
+        style: 'font-weight: 600;',
+        onclick: () => change({ skin: mp.skin, style: mp.style }, mp.color)
+      }, mp.label)
+    )
+  );
+
   const skinRow = h('div.swatches', { role: 'radiogroup', 'aria-label': 'Skin tone' });
   const styleRow = h('div.seg', { role: 'radiogroup', 'aria-label': 'Hair style' });
   const hairRow = h('div.swatches', { role: 'radiogroup', 'aria-label': 'Hair color' });
@@ -204,6 +221,8 @@ export function openCharacter(first: boolean, onSave: (p: Profile) => void) {
         h('label', {}, 'Your name'),
         account ? input : h('div.webhook', {}, input, reroll),
         account ? h('p.setting-note', {}, `🔑 Signed in as ${account.name}, so that's your name here.`) : null,
+        h('label', {}, 'Biệt đội Minions 🍌 (Chọn nhanh)'),
+        minionPresetRow,
         h('label', {}, 'Skin tone'),
         skinRow,
         h('label', {}, 'Hair'),

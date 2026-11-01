@@ -1,10 +1,10 @@
 // What a person looks like in the office, picked on the character select screen.
 // Server and client share these lists so a look is just three small indexes on the wire.
 
-export const SKIN_TONES = ['#ffe3cc', '#ffd7b5', '#f1c27d', '#e0ac69', '#c68642', '#a0663a', '#8d5524', '#5c3a21'];
+export const SKIN_TONES = ['#fed836', '#ffe3cc', '#ffd7b5', '#f1c27d', '#e0ac69', '#c68642', '#a0663a', '#8d5524', '#5c3a21', '#8b5cf6'];
 export const HAIR_COLORS = ['#2b2d42', '#4a3222', '#6f4e37', '#e9c46a', '#c1440e', '#d9d9d9', '#d62828', '#ff8fab', '#9d4edd', '#264653'];
 export const HAIR_COLOR_NAMES = ['Black', 'Dark brown', 'Brown', 'Blonde', 'Ginger', 'Silver', 'Red', 'Pink', 'Purple', 'Teal'];
-export const HAIR_STYLES = ['Short', 'Long', 'Bun', 'Spiky', 'Curly', 'Ponytail', 'Bald'];
+export const HAIR_STYLES = ['Short', 'Long', 'Bun', 'Spiky', 'Curly', 'Ponytail', 'Bald', '🍌 Stuart', '🍌 Bob', '🍌 Kevin'];
 
 export interface Look {
   skin: number;
@@ -29,8 +29,8 @@ export function randomLook(): Look {
   return { skin: pick(SKIN_TONES.length), hair: pick(HAIR_COLORS.length), style: pick(HAIR_STYLES.length) };
 }
 
-const NAME_ADJECTIVES = ['Sunny', 'Cosmic', 'Quiet', 'Speedy', 'Clever', 'Brave', 'Jolly', 'Mellow', 'Nimble', 'Plucky', 'Snappy', 'Witty', 'Zesty', 'Cozy', 'Lucky', 'Breezy', 'Chipper', 'Dapper', 'Fuzzy', 'Gentle', 'Groovy', 'Humble', 'Keen', 'Lively', 'Merry', 'Nifty', 'Peppy', 'Spry', 'Swift', 'Tidy', 'Zippy', 'Bold'];
-const NAME_ANIMALS = ['Otter', 'Heron', 'Panda', 'Falcon', 'Badger', 'Koala', 'Lynx', 'Marmot', 'Narwhal', 'Octopus', 'Penguin', 'Quokka', 'Raccoon', 'Sloth', 'Tapir', 'Walrus', 'Yak', 'Beaver', 'Capybara', 'Dolphin', 'Ferret', 'Gecko', 'Hedgehog', 'Ibis', 'Jaguar', 'Lemur', 'Moose', 'Newt', 'Owl', 'Puffin', 'Robin', 'Seal'];
+const NAME_ADJECTIVES = ['Bello', 'Banana', 'Cute', 'Sunny', 'Cosmic', 'Quiet', 'Speedy', 'Clever', 'Brave', 'Jolly', 'Mellow', 'Nimble', 'Plucky', 'Snappy', 'Witty', 'Zesty', 'Cozy', 'Lucky', 'Breezy', 'Chipper', 'Dapper', 'Fuzzy', 'Gentle', 'Groovy', 'Humble', 'Keen', 'Lively', 'Merry', 'Nifty', 'Peppy', 'Spry', 'Swift', 'Tidy', 'Zippy', 'Bold'];
+const NAME_ANIMALS = ['Minion', 'Bob', 'Kevin', 'Stuart', 'Otto', 'Otter', 'Heron', 'Panda', 'Falcon', 'Badger', 'Koala', 'Lynx', 'Marmot', 'Narwhal', 'Octopus', 'Penguin', 'Quokka', 'Raccoon', 'Sloth', 'Tapir', 'Walrus', 'Yak', 'Beaver', 'Capybara', 'Dolphin', 'Ferret', 'Gecko', 'Hedgehog', 'Ibis', 'Jaguar', 'Lemur', 'Moose', 'Newt', 'Owl', 'Puffin', 'Robin', 'Seal'];
 
 /** A made-up name like "Sunny Otter", for people who'd rather not think of one. */
 export function randomName(): string {
