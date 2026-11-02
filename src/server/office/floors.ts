@@ -136,8 +136,11 @@ export async function openFloors(ctx: Ctx, hookPort: number): Promise<FloorsOpen
       return undefined;
     }
   };
-  // Started in a project: it's a floor too (the one it has always been).
-  if (cfg.project) ctx.building.ensureLocal(cfg.project, 'the office');
+  // Started in a project, or starting with no floors: ensure the current checkout is Floor 1!
+  const defaultDir = cfg.project || process.cwd();
+  if (cfg.project || ctx.building.list().length === 0) {
+    ctx.building.ensureLocal(defaultDir, 'the office');
+  }
   for (const def of ctx.building.list()) openFloor(def);
   // Clones keep the elevator's progress up to date, and ones the last office left running carry on.
   ctx.building.watchClones(ctx.floorsChanged);

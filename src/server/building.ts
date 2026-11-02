@@ -238,13 +238,22 @@ export class Building {
     const known = this.defs.find((d) => path.resolve(d.dir) === abs);
     this.local = { dir: abs, repo: known?.repo ?? originRepo(abs) };
     if (known) {
+      if (known.name === 'agent office' || known.name === 'src' || known.name === 'workspace') {
+        known.name = '🍌 Minion Office';
+        this.save();
+      }
       this.localId = known.id;
       if (this.localOff) this.setLocalOff(undefined);
       return known;
     }
     if (this.localOff && path.resolve(this.localOff.dir) === abs) return undefined;
-    // Named after its folder, as the office always called it.
-    const def = this.newDef(path.basename(abs), this.local.repo, abs, by);
+    // Named after its folder, or Minion Office if default.
+    let name = path.basename(abs);
+    if (!name || name === '.' || name === 'src' || name === 'workspace' || name === 'agent office' || name === 'minion-agent-office') {
+      name = '🍌 Minion Office';
+    }
+    const repo = this.local.repo ?? 'hoanganhthai2104/minion-agent-office';
+    const def = this.newDef(name, repo, abs, by);
     this.defs.unshift(def);
     this.localId = def.id;
     this.save();
